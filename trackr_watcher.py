@@ -9,6 +9,7 @@ Konfiguration über Umgebungsvariablen:
   MAIL_TO             Empfänger, mehrere mit Komma getrennt (optional, Standard: GMAIL_ADDRESS)
   SEASON              Saison, z. B. 2027 (optional, Standard: unten)
   DRY_RUN=1           nichts senden, nur ausgeben
+  TEST_MAIL=1         zusätzlich eine Test-Mail senden (prüft die Zugangsdaten)
 """
 
 import json
@@ -117,6 +118,18 @@ def main():
     recipients = [a.strip() for a in (os.environ.get("MAIL_TO") or sender).split(",") if a.strip()]
     if not dry_run and not (sender and password):
         sys.exit("GMAIL_ADDRESS und GMAIL_APP_PASSWORD müssen gesetzt sein.")
+
+    if os.environ.get("TEST_MAIL") == "1":
+        test = EmailMessage()
+        test["Subject"] = "Spring week TEST"
+        test["From"] = sender
+        test["To"] = ", ".join(recipients)
+        test.set_content("Test-Mail vom Spring Week Watcher. Der Mailversand funktioniert!")
+        if dry_run:
+            print("---- Test-Mail ----\n" + test.get_content())
+        else:
+            send_mails([test], sender, password)
+            print("Test-Mail gesendet.")
 
     now = datetime.now(timezone.utc)
     programmes = fetch_programmes(season)
