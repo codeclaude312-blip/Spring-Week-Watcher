@@ -5,6 +5,11 @@ on:
     # alle 15 Minuten (Trackr-API erlaubt 100 Abrufe pro Tag)
     - cron: "*/15 * * * *"
   workflow_dispatch: # manuell starten über den "Run workflow"-Button
+    inputs:
+      test_mail:
+        description: "Test-Mail senden"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -30,6 +35,7 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
           SEASON: ${{ vars.SEASON }}
+          TEST_MAIL: ${{ inputs.test_mail && '1' || '' }}
         run: python trackr_watcher.py
 
       - name: Zustand speichern
